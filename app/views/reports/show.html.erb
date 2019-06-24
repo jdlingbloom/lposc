@@ -1,0 +1,90 @@
+<% breadcrumb(:report, @report) %>
+
+<% if params[:download_redirect] == "true" %>
+  <div class="alert alert-info progress-notice" role="alert">
+    <p>The PDF report has successfully been generated.</p>
+    <p>If your download does not begin shortly, click the download button again.</p>
+  </div>
+  <script>
+    downloadReport(<%= download_report_path(@report).to_json.html_safe %>);
+  </script>
+<% end %>
+
+<div class="row">
+  <div class="col-md-6">
+    <h1><%= @report.display_name %></h1>
+  </div>
+  <div class="col-md-6 button-actions">
+    <%= link_to('<i class="fas fa-file"></i>Download PDF'.html_safe, download_report_path(@report), :class => "btn btn-primary btn-lg") %>
+    <%= link_to('<i class="fas fa-pencil-alt"></i>Edit'.html_safe, edit_report_path(@report), :class => "btn btn-secondary btn-lg") %><br>
+  </div>
+</div>
+
+<div class="details">
+  <div class="row">
+    <div class="col-sm-4">Report Type:</div>
+    <div class="col-sm-8"><%= @report.type_name %></div>
+  </div>
+  <div class="row">
+    <div class="col-sm-4">Property Name:</div>
+    <div class="col-sm-8"><%= @report.property_name %></div>
+  </div>
+  <div class="row">
+    <div class="col-sm-4">Year of Monitoring:</div>
+    <div class="col-sm-8"><%= @report.monitoring_year %></div>
+  </div>
+  <div class="row">
+    <div class="col-sm-4">Photographer Name:</div>
+    <div class="col-sm-8"><%= @report.photographer_name %></div>
+  </div>
+  <div class="row">
+    <div class="col-sm-4">Initial Photo Number:</div>
+    <div class="col-sm-8"><%= @report.photo_starting_num %></div>
+  </div>
+  <div class="row">
+    <div class="col-sm-4">Additional Signatures to Require:</div>
+    <div class="col-sm-8"><%= safe_join(@report.extra_signatures, "<br>".html_safe) if(@report.extra_signatures.present?) %></div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4">Created:</div>
+    <div class="col-sm-8"><%= l(@report.created_at, :format => :long_tz) %> by <%= @report.creator.email %></div>
+  </div>
+  <div class="row">
+    <div class="col-sm-4">Last Updated:</div>
+    <div class="col-sm-8"><%= l(@report.updated_at, :format => :long_tz) %> by <%= @report.updater.email %></div>
+  </div>
+  <% @report.photos.each_with_index do |photo, index| %>
+    <div class="row">
+      <div class="col-sm-4 photo">
+        <% if(photo.image? && photo.image.file.last_modified) %>
+          <%= image_tag(photo.image.thumbnail.url, :class => "img-fluid center-block") %>
+          <div class="photo-num">Photo <%= @report.photo_starting_num + index %></div>
+          <%= link_to("Download original", "#{photo.image.url}?download=true") %><br>
+        <% else %>
+          <em>Missing photo</em>
+        <% end %>
+      </div>
+      <div class="col-sm-8">
+        <% if(photo.caption.present?) %>
+          <p><%= photo.caption_cleaned %></p>
+        <% end %>
+
+        <%= render("photo_metadata", :photo => photo) %>
+      </div>
+    </div>
+  <% end %>
+  <% if(@report.upload_progress == "pending") %>
+    <div class="row">
+      <div class="col-sm-8 offset-sm-4">
+        <div class="alert alert-info" role="alert">File uploads are in progress...</div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="row footer">
+  <div class="col-sm-12 text-right">
+    <%= link_to('<i class="fas fa-times"></i>Delete'.html_safe, report_path(@report), :method => :delete, :data => { :confirm => "Are you sure you want to delete the #{@report.display_name} monitoring report?" }, :class => "btn btn-danger btn-sm") %>
+  </div>
+</div>
