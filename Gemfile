@@ -8,7 +8,7 @@ gem "rails", "~> 5.2.1"
 gem "foreman", "~> 0.85.0"
 
 # Server
-gem "puma", "~> 3.12.0"
+gem "puma", "~> 3.12.2"
 
 # PostgreSQL
 gem "pg", "~> 1.1.3"
